@@ -24,6 +24,8 @@ namespace CarPooling.Models
 
         public static readonly string ConfirmOption = "Press 1 for confirm this offer";
 
+        public static readonly string Another = "Press 1. Yes\n      2. No";
+
         public static readonly string UpdateDetailResponse = "Your detail has been updated";
 
         public static readonly string AccountDeleteResponse = "You account has been deleted";
@@ -99,5 +101,9 @@ namespace CarPooling.Models
         public static readonly string DisplayWaitingBooking = "Waiting for owner response";
 
         public static readonly string NoOfViaPlaces = "No of via place : ";
+
+        public static readonly string UserNameAvailable = "Sorry this username will be taken by someone please choose another or username will be null";
+
+        public static readonly string ViaCities = "Via City";
     }
 }

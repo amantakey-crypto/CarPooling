@@ -16,7 +16,7 @@ namespace CarPooling
             User user = new User();
 
             Console.Write(Constant.UserId);
-            user.Id = Helper.ValidString();
+            user.Id = Helper.GetValidUserName();
 
             Console.Write(Constant.Password);
             user.Password = Helper.ValidString();
@@ -28,7 +28,7 @@ namespace CarPooling
             user.MobileNumber = Helper.ValidString();
 
             Console.Write(Constant.Email);
-            user.Email = Helper.ValidString();
+            user.Email = Helper.GetValidEmail();
 
             Console.Write(Constant.Address);
             user.Address = Helper.ValidString();
@@ -172,6 +172,28 @@ namespace CarPooling
         public static ConfirmationResponse Confirmation()
         {
             Console.WriteLine(Constant.ConfirmOption);
+
+            ConfirmationResponse option = (ConfirmationResponse)Helper.ValidInteger();
+
+            switch (option)
+            {
+                case ConfirmationResponse.Yes:
+                    return ConfirmationResponse.Yes;
+
+                case ConfirmationResponse.No:
+                    return ConfirmationResponse.No;
+
+                default:
+                    Console.WriteLine(Constant.InvalidValue);
+                    option = Confirmation();
+                    return option;
+
+            }
+        }
+
+        public static ConfirmationResponse Response()
+        {
+            Console.WriteLine(Constant.Another);
 
             ConfirmationResponse option = (ConfirmationResponse)Helper.ValidInteger();
 

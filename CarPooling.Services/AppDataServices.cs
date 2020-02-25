@@ -63,5 +63,10 @@ namespace CarPooling.Services
         {
             return Users.SelectMany(a => a.Bookings).FirstOrDefault(a => a.Id == id);
         }
+
+        public static bool GetUserNameAvailabilty(string Id)
+        {
+            return Users.Select(a => a.Id).Contains(Id);
+        }
     }
 }

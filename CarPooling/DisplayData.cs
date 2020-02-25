@@ -20,6 +20,11 @@ namespace CarPooling
             Console.WriteLine(Constant.CarCapacity + ride.Car.MaxSeatCapacity);
             Console.WriteLine(Constant.JourneyDetail);
             Console.WriteLine(Constant.Source + ride.SourceCityName);
+            Console.WriteLine(Constant.ViaCities+ "  : "+ ride.Points.Count);
+            foreach (var city in ride.Points)
+            {
+                Console.WriteLine(Constant.City + city.City);
+            }
             Console.WriteLine(Constant.Destination + ride.DestinationCityName);
             Console.WriteLine(Constant.Date + ride.Date);
             Console.WriteLine(Constant.Pincode + ride.Pincode);

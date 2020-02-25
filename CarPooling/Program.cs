@@ -142,7 +142,6 @@ namespace CarPooling
                                             {
                                                 Console.WriteLine(Constant.SeatBookResponse);
                                             }
-
                                             break;
 
                                         case BookingStatus.Rejected:
@@ -150,6 +149,11 @@ namespace CarPooling
 
                                             break;
                                     }
+                                    if (UserInput.Confirmation() == ConfirmationResponse.Yes)
+                                    {
+                                        break;
+                                    }
+
                                 }
 
                                 if (rides.Count < 1)
@@ -183,6 +187,10 @@ namespace CarPooling
                                         Console.WriteLine(Constant.DisplayWaitingBooking);
 
                                         break;
+                                }
+                                if (UserInput.Confirmation() == ConfirmationResponse.Yes)
+                                {
+                                    break;
                                 }
                             }
                             Console.ReadKey();

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CarPooling
@@ -42,6 +43,32 @@ namespace CarPooling
             }
 
             return date;
+        }
+
+        public static string GetValidEmail()
+        {
+            string email = Console.ReadLine();
+            Regex regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
+            Match match = regex.Match(email);
+            if (string.IsNullOrEmpty(email) || !match.Success)
+            {
+                Console.WriteLine(Constant.InvalidValue);
+                email = GetValidEmail();
+            }
+
+            return email;
+        }
+
+        public static string GetValidUserName()
+        {
+            string userName = Console.ReadLine();
+            if (string.IsNullOrEmpty(userName) || (!AppDataServices.GetUserNameAvailabilty(userName)))
+            {
+                Console.WriteLine(Constant.UserNameAvailable);
+                userName = GetValidUserName();
+            }
+
+            return userName;
         }
 
         public static string GetValidCity()
