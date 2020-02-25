@@ -17,18 +17,18 @@ namespace CarPooling.Models
 
         public enum UserMainMenuOption
         {
-            CreateRideOffer=1,
-            BookRideOffer,
-            ViewBookingStatus,
-            ModifyOffer,
-            DeleteRideOffer,
-            UpdateDetails,
-            DeleteAccount,
+            CreateRide=1,
+            BookARide,
+            ViewStatus,
+            ModifyRide,
+            DeleteRide,
+            UpdateAccountDetail,
+            DeleteUserAccount,
             SignOut,
             Exit
         };
 
-        public enum BookinStatusMenuOPtion
+        public enum BookingStatusMenuOption
         {
             RideOffer=1,
             RideRequest,
@@ -49,7 +49,7 @@ namespace CarPooling.Models
             Exit
         };
 
-        public enum RideOption
+        public enum ConfirmationResponse
         {
             Yes=1,
             No

@@ -17,31 +17,76 @@ namespace CarPooling.Services
             this.CurrentUser = AppDataServices.GetUser(userId);
         }
 
-        public bool CreateBooking(Booking booking)
+        public bool CreateBooking(Ride booking)
         {
             booking.Id = Guid.NewGuid();
-            booking.Owner = this.CurrentUser;
-            booking.Type = UserType.Owner;
-
-            this.CurrentUser.Bookings.Add(booking);
+            this.CurrentUser.Rides.Add(booking);
 
             return true;
         }
 
-        public List<Booking> ViewRideOffer(Journey journey)
+        public List<Ride> ViewRideOffer(Booking booking)
         {
-            var bookings = AppDataServices.Users.SelectMany(a => a.Bookings)
-                .Where(a=>a.Journey.StatingPlace==journey.StatingPlace&&a.Journey.EndPlace==journey.EndPlace&&a.Journey.Date==journey.Date&&a.Type==UserType.Owner)
+            var rides = AppDataServices.Users.SelectMany(a => a.Rides)
+                .Where(a=>a.SourceCityName== booking.SourceCityName&&a.DestinationCityName== booking.DestinationCityName && a.Date==a.Date&&a.Car.VacantSeat>0)
                 .Select(a => a).ToList();
+            int count = 0;
 
-            return bookings;
+           if (rides.Count<=0)
+            {
+                var availableRides = AppDataServices.Users.SelectMany(a => a.Rides).Where(a => a.Date == a.Date && a.Car.VacantSeat > 0).Select(a => a);
+
+                foreach(var ride in availableRides)
+                {
+                    if (ride.DestinationCityName == booking.DestinationCityName)
+                    {
+                        count++;
+                        if (count == 2)
+                        {
+                            rides.Add(ride);
+                            break;
+                        }
+                    }
+                        
+                    else if (ride.SourceCityName == booking.SourceCityName)
+                        count++;
+                    else
+                    {
+                        foreach(var city in ride.Points)
+                        {
+                            if (city.City == booking.DestinationCityName)
+                            {
+                                count++;
+                                if (count == 2)
+                                {
+                                    rides.Add(ride);
+                                    break;
+                                }
+                            }
+                            else if (city.City == booking.SourceCityName)
+                                count++;
+                        }
+                    }
+
+                    
+                }
+
+                //var places = AppDataServices.Users
+                //     .SelectMany(a => a.Rides).Where(a => a.Date == a.Date && a.Car.VacantSeat > 0)
+                //     .SelectMany(a => a.Points)
+                //     .Where(a => a.City==booking.SourceCityName && a.City==booking.DestinationCityName).Select(a => a).ToList();
+
+                //rides = AppDataServices.Users.SelectMany(a => a.Rides).Where(a => a.Points == places).Select(a => a).ToList();
+            }
+
+            return rides;
         }
 
-        public bool DeleteRideOffer(Booking booking)
+        public bool DeleteRideOffer(Ride ride)
         {
-            if (booking.Traveller.Count == 0)
+            if (ride.AcceptedBookerId.Count == 0)
             {
-                this.CurrentUser.Bookings.Remove(booking);
+                this.CurrentUser.Rides.Remove(ride);
                 return true;
             }
 
@@ -59,45 +104,46 @@ namespace CarPooling.Services
             return false;
         }
 
-        public bool ModifyBooking(Booking newBooking,Booking oldBooking)
+        public bool ModifyRide(Ride newRide,Ride oldRide)
         {
-            newBooking.Id = oldBooking.Id;
-            oldBooking = newBooking;
+            newRide.Id = oldRide.Id;
+            oldRide = newRide;
             return true;
         }
 
-        public bool RequestBooking(Booking booking)
+        public bool RequestBooking(Booking booking,Guid bookingId)
         {
-            if (this.CurrentUser != booking.Owner)
+
+            if (this.CurrentUser.Rides?.FirstOrDefault(a => a.Id == bookingId) == null)
             {
+                booking.Id=Guid.NewGuid();
                 booking.Status = BookingStatus.Pending;
-                booking.Type = UserType.Traveller;
                 this.CurrentUser.Bookings.Add(booking);
-                Booking ownerBooking = AppDataServices.Users.SelectMany(a => a.Bookings).FirstOrDefault(a => a.Id == booking.Id);
-                booking.Type = UserType.Owner;
-                ownerBooking.Traveller.Add(this.CurrentUser);
+                Ride ownerBooking = AppDataServices.Users.SelectMany(a => a.Rides).FirstOrDefault(a => a.Id == bookingId);
+                ownerBooking.RequestBookerId.Add(booking.Id);
                 return true;
             }
 
             return false;
         }
 
-        public List<Booking> ViewCreatedBookingStatus()
+        public List<Ride> ViewCreatedRideStatus()
         {
-            var bookings = this.CurrentUser.Bookings.SelectMany(a => a.Traveller)
-                               .SelectMany(a => a.Bookings)
-                               .Where(a => a.Status == BookingStatus.Pending)
-                               .Select(a => a).ToList();
+            var rides = this.CurrentUser.Rides.Where(a => a.RequestBookerId.Count != 0).Select(a => a).ToList();
 
-            return bookings;
+            return rides;
         }
 
-        public bool SeatBookingConfirm(Booking booking)
+        public bool SeatBookingConfirm(Guid bookingId)
         {
-            if (booking.Car.VacantSeat > 0)
+            Ride ride = this.CurrentUser.Rides.FirstOrDefault(a=>a.RequestBookerId.Contains(bookingId));
+            Booking booking = AppDataServices.GetBooking(bookingId);
+            if (ride.Car.VacantSeat > 0)
             {
+                ride.AcceptedBookerId.Add(bookingId);
+                ride.RequestBookerId.Remove(bookingId);
                 booking.Status = BookingStatus.Confirm;
-                booking.Car.VacantSeat--;
+                ride.Car.VacantSeat--;
                 return true;
             }
             else
@@ -107,21 +153,24 @@ namespace CarPooling.Services
             }
         }
 
-        public void SeatBookingReject(Booking booking)
+        public void SeatBookingReject(Guid bookingId)
         {
+            Ride ride = this.CurrentUser.Rides.FirstOrDefault(a => a.RequestBookerId.Contains(bookingId));
+            Booking booking = AppDataServices.GetBooking(bookingId);
             booking.Status = BookingStatus.Rejected;
+            ride.RequestBookerId.Remove(bookingId);
         }
 
         public List<Booking> ViewSeatBookingRequestStatus()
         {
-            var bookings = this.CurrentUser.Bookings.Where(a=>a.Type==UserType.Traveller).Select(a => a).ToList();
+            var bookings = this.CurrentUser.Bookings.Select(a => a).ToList();
 
             return bookings;
         }
 
-        public List<Booking> ViewOfferStatus()
+        public List<Ride> ViewOfferStatus()
         {
-            var bookings = this.CurrentUser.Bookings.Where(a => a.Type == UserType.Owner).Select(a => a).ToList();
+            var bookings = this.CurrentUser.Rides.Select(a => a).ToList();
 
             return bookings;
         }

@@ -1,4 +1,5 @@
 ﻿using CarPooling.Models;
+using CarPooling.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,10 +44,18 @@ namespace CarPooling
             return date;
         }
 
-        public static int RandomNumber(int min, int max)
+        public static string GetValidCity()
         {
-            Random random = new Random();
-            return random.Next(min, max);
+            string cityName = Console.ReadLine();
+            CitiesRecord citiesRecord = new CitiesRecord();
+            if (!citiesRecord.CheckValidCity(cityName))
+            {
+                Console.WriteLine(Constant.InvalidValue);
+                cityName = GetValidCity();
+                return cityName;
+            }
+
+            return cityName;
         }
     }
 }

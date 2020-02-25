@@ -19,7 +19,7 @@ namespace CarPooling
 
         public static void MainMenu()
         {
-            Console.Write(Constant.MainMenu);
+            Console.Write(Constant.MainMenuOption);
             MainMenuOption option = (MainMenuOption)Helper.ValidInteger();
             switch (option)
             {
@@ -35,13 +35,13 @@ namespace CarPooling
                         }
                         else
                         {
-                            Console.WriteLine(Constant.InvalidUserIdOrPassword);
+                            Console.WriteLine(Constant.InvalidUserIdPassword);
                         }
                     }
 
                     catch (Exception)
                     {
-                        Console.WriteLine(Constant.InvalidUserIdOrPassword);
+                        Console.WriteLine(Constant.InvalidUserIdPassword);
                     }
                     MainMenu();
 
@@ -63,45 +63,44 @@ namespace CarPooling
 
     public class Menu
     {
-        public BookingServices Booking { get; set; }
+        public BookingServices BookingServices { get; set; }
 
         public string UserId { get; set; }
 
         public Menu(string userId)
         {
-            this.Booking = new BookingServices(userId);
-
+            this.BookingServices = new BookingServices(userId);
             this.UserId = userId;
         }
 
         public void UserMainMenu()
         {
             Console.Clear();
-            Console.Write(Constant.UserMainMenu);
+            Console.Write(Constant.UserMainMenuOption);
             UserMainMenuOption option = (UserMainMenuOption)Helper.ValidInteger();
             switch (option)
             {
-                case UserMainMenuOption.CreateRideOffer:
-                    this.Booking.CreateBooking(UserInput.GetBooking());
-
+                case UserMainMenuOption.CreateRide:
+                    this.BookingServices.CreateBooking(UserInput.GetRideDetail());
                     UserMainMenu();
 
                     break;
 
-                case UserMainMenuOption.BookRideOffer:
-                    List<Booking> bookings = this.Booking.ViewRideOffer(UserInput.GetRiderJourney());
-                    if (bookings.Count>0)
+                case UserMainMenuOption.BookARide:
+                    Booking booking = UserInput.GetBooking();
+                    List<Ride> rides = this.BookingServices.ViewRideOffer(booking);
+                    if (rides.Count > 0)
                     {
-                        foreach (var booking in bookings)
+                        foreach (var ride in rides)
                         {
                             Console.Clear();
                             Console.WriteLine(booking.Id);
-                            Display.OfferRide(booking);
-                            if (UserInput.RideChoice())
+                            Display.OfferRide(ride);
+                            if (UserInput.Confirmation()==ConfirmationResponse.Yes)
                             {
-                                if (!this.Booking.RequestBooking(booking))
+                                if (!this.BookingServices.RequestBooking(booking, ride.Id))
                                 {
-                                    Console.WriteLine(Constant.InvalidBooking);
+                                    Console.WriteLine(Constant.InvalidBookingRequest);
                                 }
                                 else
                                 {
@@ -112,7 +111,7 @@ namespace CarPooling
                     }
                     else
                     {
-                        Console.WriteLine(Constant.NoOfferForThisRoute);
+                        Console.WriteLine(Constant.NoRequestCurrently);
                     }
 
                     Console.ReadKey();
@@ -120,61 +119,55 @@ namespace CarPooling
 
                     break;
 
-                case UserMainMenuOption.ViewBookingStatus:
-                    Console.Write(Constant.StatusMenu);
-                    BookinStatusMenuOPtion statusOption = (BookinStatusMenuOPtion)Helper.ValidInteger();
+                case UserMainMenuOption.ViewStatus:
+                    Console.Write(Constant.CheckRequestStatusOption);
+                    BookingStatusMenuOption statusOption = (BookingStatusMenuOption)Helper.ValidInteger();
                     switch (statusOption)
                     {
-                        case BookinStatusMenuOPtion.RideOffer:
-                            bookings = this.Booking.ViewCreatedBookingStatus();
-                            if (bookings != null)
+                        case BookingStatusMenuOption.RideOffer:
+                            rides = this.BookingServices.ViewCreatedRideStatus();
+                            foreach (var ride in rides)
                             {
-                                foreach (var booking in bookings)
+                                foreach (var bookingId in ride.RequestBookerId)
                                 {
-                                    Console.Clear();
-                                    Display.OfferRide(booking);
-                                    switch(UserInput.RequestChoice())
+                                    Display.BookingRequest(AppDataServices.GetBooking(bookingId));
+                                    switch (UserInput.BookingChoice())
                                     {
                                         case BookingStatus.Confirm:
-                                            if (!this.Booking.SeatBookingConfirm(booking))
+                                            if (!this.BookingServices.SeatBookingConfirm(bookingId))
                                             {
-                                                Console.WriteLine(Constant.SeatFullMessage);
+                                                Console.WriteLine(Constant.SeatFull);
                                             }
                                             else
                                             {
-                                                Console.WriteLine(Constant.SeatBookSuccessfull);
+                                                Console.WriteLine(Constant.SeatBookResponse);
                                             }
-
-                                            Console.ReadKey();
 
                                             break;
 
                                         case BookingStatus.Rejected:
-                                            this.Booking.SeatBookingReject(booking);
+                                            this.BookingServices.SeatBookingReject(bookingId);
 
-                                            break;
-
-                                        case BookingStatus.Pending:
                                             break;
                                     }
                                 }
-                            }
-                            else
-                            {
-                                Console.WriteLine(Constant.NoRequestCurrently);
-                            }
 
-                            Console.ReadKey();
-                            UserMainMenu();
+                                if (rides.Count < 1)
+                                {
+                                    Console.WriteLine(Constant.NoRequestCurrently);
+                                }
 
+                                Console.ReadKey();
+                                UserMainMenu();
+                            }
                             break;
 
-                        case BookinStatusMenuOPtion.RideRequest:
-                            bookings = this.Booking.ViewSeatBookingRequestStatus();
-                            foreach(var booking in bookings)
+                        case BookingStatusMenuOption.RideRequest:
+                            List<Booking> bookings = this.BookingServices.ViewSeatBookingRequestStatus();
+                            foreach (var book in bookings)
                             {
-                                Display.RideRequest(booking);
-                                switch (booking.Status)
+                                Display.BookingRequest(book);
+                                switch (book.Status)
                                 {
                                     case BookingStatus.Confirm:
                                         Console.WriteLine(Constant.DisplayConfirmBooking);
@@ -192,32 +185,31 @@ namespace CarPooling
                                         break;
                                 }
                             }
-
                             Console.ReadKey();
                             UserMainMenu();
 
                             break;
 
-                        case BookinStatusMenuOPtion.RiderDetail:
-                            bookings = this.Booking.ViewOfferStatus();
-                            foreach(var booking in bookings)
+                        case BookingStatusMenuOption.RiderDetail:
+                            rides = this.BookingServices.ViewOfferStatus();
+                            foreach (var ride in rides)
                             {
                                 Console.Clear();
-                                Display.OfferRide(booking);
-                                Console.WriteLine(Constant.PassangerCount + booking.Traveller.Count);
+                                Display.OfferRide(ride);
+                                int travellerCount = ride.AcceptedBookerId.Count;
+                                Console.WriteLine(Constant.PassangerCount + travellerCount);
                             }
-
                             Console.ReadKey();
                             UserMainMenu();
 
                             break;
 
-                        case BookinStatusMenuOPtion.SignOut:
+                        case BookingStatusMenuOption.SignOut:
                             Program.MainMenu();
 
                             break;
 
-                        case BookinStatusMenuOPtion.Exit:
+                        case BookingStatusMenuOption.Exit:
                             Environment.Exit(0);
 
                             break;
@@ -226,33 +218,35 @@ namespace CarPooling
 
                     break;
 
-                case UserMainMenuOption.ModifyOffer:
-                    bookings = this.Booking.ViewOfferStatus();
-                    foreach (var booking in bookings)
+                case UserMainMenuOption.ModifyRide:
+                    rides = this.BookingServices.ViewOfferStatus();
+                    foreach (var ride in rides)
                     {
                         Console.Clear();
-                        Display.OfferRide(booking);
-                        Console.WriteLine(Constant.PassangerCount + booking.Traveller.Count);
+                        Display.OfferRide(ride);
+                        int confirmBookingCount = ride.AcceptedBookerId.Count;
+                        Console.WriteLine(Constant.PassangerCount + confirmBookingCount);
                         Console.WriteLine(Constant.ConfirmOption);
-                        if (Helper.ValidInteger() == 1&&booking.Traveller.Count==0)
+                        if (UserInput.Confirmation()==ConfirmationResponse.Yes && confirmBookingCount == 0)
                         {
-                            this.Booking.ModifyBooking(UserInput.GetBooking(),booking);
+                            this.BookingServices.ModifyRide(UserInput.GetRideDetail(), ride);
                         }
                     }
 
                     break;
 
-                case UserMainMenuOption.DeleteRideOffer:
-                    bookings = this.Booking.ViewOfferStatus();
-                    foreach (var booking in bookings)
+                case UserMainMenuOption.DeleteRide:
+                    rides = this.BookingServices.ViewOfferStatus();
+                    foreach (var ride in rides)
                     {
                         Console.Clear();
-                        Display.OfferRide(booking);
-                        Console.WriteLine(Constant.PassangerCount + booking.Traveller.Count);
+                        Display.OfferRide(ride);
+                        int ConfirmBookingCount = ride.AcceptedBookerId.Count;
+                        Console.WriteLine(Constant.PassangerCount + ConfirmBookingCount);
                         Console.WriteLine(Constant.ConfirmOption);
-                        if (Helper.ValidInteger() == 1)
+                        if (UserInput.Confirmation()==ConfirmationResponse.Yes)
                         {
-                            this.Booking.DeleteRideOffer(booking);
+                            this.BookingServices.DeleteRideOffer(ride);
                         }
                     }
 
@@ -261,18 +255,22 @@ namespace CarPooling
 
                     break;
 
-                case UserMainMenuOption.UpdateDetails:
+                case UserMainMenuOption.UpdateAccountDetail:
                     if (AppDataServices.UpdateUserDetail(UserInput.NewUser(), AppDataServices.GetUser(this.UserId)))
                     {
-                        Console.WriteLine(Constant.UpdateDetail);
+                        Console.WriteLine(Constant.UpdateDetailResponse);
                     }
 
                     break;
 
-                case UserMainMenuOption.DeleteAccount:
-                    if (AppDataServices.DeleteUser(AppDataServices.GetUser(this.UserId)))
+                case UserMainMenuOption.DeleteUserAccount:
+                    Console.WriteLine(Constant.Confirmation);
+                    if (UserInput.Confirmation() == ConfirmationResponse.Yes)
                     {
-                        Console.WriteLine(Constant.DeleteAccount);
+                        if (AppDataServices.DeleteUser(AppDataServices.GetUser(this.UserId)))
+                        {
+                            Console.WriteLine(Constant.AccountDeleteResponse);
+                        }
                     }
 
                     break;

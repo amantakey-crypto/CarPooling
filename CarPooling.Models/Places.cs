@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace CarPooling.Models
 {
-    public class ViaPoint
+    public class Places
     {
         public string City { get; set; }
 
-        public string Pincode { get; set; }
+        public int Pincode { get; set; }
 
         public string LandMark { get; set; }
     }

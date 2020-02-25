@@ -9,27 +9,35 @@ namespace CarPooling
 {
     public class Display
     {
-        public static void OfferRide(Booking booking)
+        public static void OfferRide(Ride ride)
         {
+            Console.Clear();
+            Console.WriteLine(ride.Id);
             Console.WriteLine(Constant.CarDetail);
-            Console.WriteLine(Constant.CarNumber + booking.Car.Number);
-            Console.WriteLine(Constant.CarModel + booking.Car.Model);
-            Console.WriteLine(Constant.VacantSeat + booking.Car.VacantSeat);
-            Console.WriteLine(Constant.CarCapacity + booking.Car.MaxSeatCapacity);
+            Console.WriteLine(Constant.CarNumber + ride.Car.Number);
+            Console.WriteLine(Constant.CarModel + ride.Car.Model);
+            Console.WriteLine(Constant.VacantSeat + ride.Car.VacantSeat);
+            Console.WriteLine(Constant.CarCapacity + ride.Car.MaxSeatCapacity);
             Console.WriteLine(Constant.JourneyDetail);
-            Console.WriteLine(Constant.Begining + booking.Journey.StatingPlace);
-            Console.WriteLine(Constant.Ending + booking.Journey.EndPlace);
-            Console.WriteLine(Constant.Date + booking.Journey.Date);
+            Console.WriteLine(Constant.Source + ride.SourceCityName);
+            Console.WriteLine(Constant.Destination + ride.DestinationCityName);
+            Console.WriteLine(Constant.Date + ride.Date);
+            Console.WriteLine(Constant.Pincode + ride.Pincode);
+            Console.WriteLine(Constant.LandMark + ride.LandMark);
+            Console.ReadKey();
         }
 
-        public static void RideRequest(Booking booking)
+        public static void BookingRequest(Booking booking)
         {
+            Console.Clear();
+            Console.WriteLine(booking.Id);
             Console.WriteLine(Constant.JourneyDetail);
-            Console.WriteLine(Constant.Begining + booking.Journey.StatingPlace);
-            Console.WriteLine(Constant.Ending + booking.Journey.EndPlace);
-            Console.WriteLine(Constant.Date + booking.Journey.Date);
-            Console.WriteLine(Constant.Pincode + booking.Journey.Pincoode);
-            Console.WriteLine(Constant.LandMark + booking.Journey.LandMark);
+            Console.WriteLine(Constant.Source+ booking.SourceCityName);
+            Console.WriteLine(Constant.Destination + booking.DestinationCityName);
+            Console.WriteLine(Constant.Date + booking.Date);
+            Console.WriteLine(Constant.Pincode + booking.Pincode);
+            Console.WriteLine(Constant.LandMark + booking.LandMark);
+            Console.ReadKey();
         }
     }
 }

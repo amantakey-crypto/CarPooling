@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static CarPooling.Models.Enum;
 
 namespace CarPooling.Models
 {
-    public class Booking
+    public class Ride 
     {
         public Guid Id { get; set; }
-
-        public Guid RequestedRide { get; set; }
 
         public string SourceCityName { get; set; }
 
@@ -21,8 +18,23 @@ namespace CarPooling.Models
 
         public string LandMark { get; set; }
 
-        public BookingStatus Status { get; set; }
-
         public DateTime Date { get; set; }
+
+        public Car Car { get; set; }
+
+        public List<Places> Points { get; set; }
+
+        public List<Guid> RequestBookerId { get; set; }
+
+        public List<Guid> AcceptedBookerId { get; set; }
+
+        public Ride()
+        {
+            RequestBookerId = new List<Guid>();
+
+            AcceptedBookerId = new List<Guid>();
+
+            Points = new List<Places>();
+        }
     }
 }

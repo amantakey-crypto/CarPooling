@@ -15,6 +15,5 @@ namespace CarPooling.Models
         public int MaxSeatCapacity { get; set; }
 
         public int VacantSeat { get; set; }
-
     }
 }

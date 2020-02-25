@@ -17,7 +17,7 @@ namespace CarPooling.Models
 
         public string MobileNumber { get; set; }
 
-        public string EmailAddress { get; set; }
+        public string Email { get; set; }
 
         public string Address { get; set; }
 
@@ -25,19 +25,19 @@ namespace CarPooling.Models
 
         public string IdProofNumber { get; set; }
 
-        public List<Booking> Bookings { get; set; }
+        public List<Ride> Rides { get; set; }
 
-        public List<Booking> PastBookings { get; set; }
+        public List<Booking> Bookings { get; set; }
 
         public List<Rating> Ratings { get; set; }
 
         public User()
         {
-            Bookings = new List<Booking>();
-
-            PastBookings = new List<Booking>();
-
             Ratings = new List<Rating>();
+
+            Rides = new List<Ride>();
+
+            Bookings = new List<Booking>();
         }
     }
 }

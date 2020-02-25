@@ -27,8 +27,8 @@ namespace CarPooling
             Console.Write(Constant.MobileNumber);
             user.MobileNumber = Helper.ValidString();
 
-            Console.Write(Constant.EmailAddress);
-            user.EmailAddress = Helper.ValidString();
+            Console.Write(Constant.Email);
+            user.Email = Helper.ValidString();
 
             Console.Write(Constant.Address);
             user.Address = Helper.ValidString();
@@ -56,16 +56,53 @@ namespace CarPooling
             return login;
         }
 
-        public static Booking GetBooking()
+        public static Ride GetRideDetail()
         {
             Console.Clear();
-            Booking booking = new Booking
-            {
-                Car = GetCarDetails(),
-                Journey = GetJourney()
-            };
+            Ride ride = new Ride();
 
-            return booking;
+            Console.Write(Constant.Date);
+            ride.Date = Helper.ValidDate();
+
+            ride.Car = GetCarDetails();
+
+            Console.Write(Constant.Source);
+            ride.SourceCityName = Helper.GetValidCity();
+
+            while (true)
+            {
+                Console.Write(Constant.Destination);
+                ride.DestinationCityName = Helper.GetValidCity();
+                if (ride.DestinationCityName != ride.SourceCityName)
+                    break;
+                else
+                {
+                    Console.WriteLine(Constant.InvalidValue);
+                }
+            }
+
+            Console.Write(Constant.LandMark);
+            ride.LandMark = Console.ReadLine();
+
+            Console.Write(Constant.NoOfViaPlaces);
+            int number = Helper.ValidInteger();
+            for (int count = 0; count < number; count++)
+            {
+                var places = GetPlaces();
+                var duplicate = ride.Points.FirstOrDefault(a => a.City == places.City);
+
+                if (places.City != ride.DestinationCityName && places.City != ride.SourceCityName && duplicate == null)
+                {
+                    ride.Points.Add(places);
+                }
+                else
+                {
+                    Console.WriteLine(Constant.InvalidValue);
+                    count--;
+                }   
+            }
+
+            return ride;
         }
 
         public static Car GetCarDetails()
@@ -88,83 +125,75 @@ namespace CarPooling
                 car.VacantSeat = Helper.ValidInteger();
                 if (car.VacantSeat <= car.MaxSeatCapacity)
                     break;
-                Console.WriteLine(Constant.VacantSeatNotCorrect);
+                Console.WriteLine(Constant.InvalidVacantSeat);
             }
 
             return car;
         }
 
-        public static Journey GetJourney()
+        public static Booking GetBooking()
         {
-            Journey journey = new Journey();
-
+            Booking booking = new Booking();
             Console.WriteLine(Constant.JourneyDetail);
+
             Console.Write(Constant.Date);
-            journey.Date = Helper.ValidDate();
+            booking.Date = Helper.ValidDate();
 
-            Console.Write(Constant.Begining);
-            journey.StatingPlace = Helper.ValidString();
+            Console.Write(Constant.Source);
+            booking.SourceCityName = Helper.GetValidCity(); ;
 
-            Console.Write(Constant.Ending);
-            journey.EndPlace = Helper.ValidString();
-
-            Console.Write(Constant.Pincode);
-            journey.Pincoode = Helper.ValidInteger();
+            while (true)
+            {
+                Console.Write(Constant.Destination);
+                booking.DestinationCityName = Helper.GetValidCity();
+                if (booking.DestinationCityName != booking.SourceCityName)
+                    break;
+                else
+                {
+                    Console.WriteLine(Constant.InvalidValue);
+                }
+            }
 
             Console.Write(Constant.LandMark);
-            journey.LandMark = Console.ReadLine();
-            return journey;
+            booking.LandMark = Console.ReadLine();
+
+            return booking;
         }
 
-        public static ViaPoint GetPlaces()
+        public static Places GetPlaces()
         {
-            ViaPoint point = new ViaPoint();
+            Places point = new Places();
 
+            Console.Write(Constant.City);
+            point.City = Helper.GetValidCity();
             return point;
         }
 
-        public static Journey GetRiderJourney()
+        public static ConfirmationResponse Confirmation()
         {
-            Console.Clear();
-            Journey journey = new Journey();
+            Console.WriteLine(Constant.ConfirmOption);
 
-            Console.WriteLine(Constant.JourneyDetail);
-            Console.Write(Constant.Date);
-            journey.Date = Helper.ValidDate();
+            ConfirmationResponse option = (ConfirmationResponse)Helper.ValidInteger();
 
-            Console.Write(Constant.Begining);
-            journey.StatingPlace = Helper.ValidString();
-
-            Console.Write(Constant.Ending);
-            journey.EndPlace = Helper.ValidString();
-
-            Console.Write(Constant.Pincode);
-            journey.Pincoode = Helper.ValidInteger();
-
-            Console.Write(Constant.LandMark);
-            journey.LandMark = Console.ReadLine();
-            return journey;
-        }
-
-        public static bool RideChoice()
-        {
-            Console.WriteLine(Constant.RideChoice);
-
-            RideOption option = (RideOption)Helper.ValidInteger();
-
-            if(option== RideOption.Yes)
+            switch (option)
             {
-                return true;
-            }
-            else 
-            {
-                return false;
+                case ConfirmationResponse.Yes:
+                    return ConfirmationResponse.Yes;
+
+                case ConfirmationResponse.No:
+                    return ConfirmationResponse.No;
+
+                default:
+                    Console.WriteLine(Constant.InvalidValue);
+                    option = Confirmation();
+                    return option;
+
             }
         }
 
-        public static BookingStatus RequestChoice()
+        public static BookingStatus BookingChoice()
         {
-            Console.WriteLine(Constant.RequestChoice);
+            Console.WriteLine(Constant.RideRequestChoice);
 
             BookingStatus option = (BookingStatus)Helper.ValidInteger();
 
@@ -180,7 +209,9 @@ namespace CarPooling
                     return BookingStatus.Pending;
 
                 default:
-                    return BookingStatus.Pending;
+                    Console.WriteLine(Constant.InvalidValue);
+                    option = BookingChoice();
+                    return option;
             }
         }
     }

@@ -58,5 +58,10 @@ namespace CarPooling.Services
         {
             return Users.FirstOrDefault(a => a.Id == userId);
         }
+
+        public static Booking GetBooking(Guid id)
+        {
+            return Users.SelectMany(a => a.Bookings).FirstOrDefault(a => a.Id == id);
+        }
     }
 }
